@@ -1,19 +1,41 @@
-import Footer from "./components/Footer";
-import Header from "./components/Header";
-import Login from "./components/Login";
+import { useEffect } from "react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { onAuthStateChanged } from "firebase/auth";
+import { addUser, removeUser } from "./features/userAuth/userAuthSlice";
+import LoginPage from "./routes/LoginPage";
+import BrowsePage from "./routes/BrowsePage";
+import { auth } from "./utils/firebase";
 
 function App() {
-  return (
-    <div className=" w-full h-screen bg-black sm:relative sm:isolate sm:bg-[url('https://assets.nflxext.com/ffe/siteui/vlv3/74d734ca-0eab-4cd9-871f-bca01823d872/web/IN-en-20241021-TRIFECTA-perspective_2277eb50-9da3-4fdf-adbe-74db0e9ee2cf_medium.jpg')] sm:bg-cover sm:bg-no-repeat sm:bg-center sm:after:content-[''] sm:after:absolute sm:after:inset-0  sm:after:bg-black sm:after:z-[-1] sm:after:opacity-60 text-white ">
-      <div className="container h-full mx-auto">
-        <Header />
-        <main className="mt-6 sm:mt-8">
-          <Login />
-        </main>
-      </div>
-      <Footer />
-    </div>
-  );
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const { uid, email, displayName } = user;
+        console.log(user);
+        // if user sign in or sign up then dispatch action
+        dispatch(addUser({ uid, email, displayName }));
+      } else {
+        // User is signed out the dispatch action
+        dispatch(removeUser());
+      }
+    });
+  }, []);
+
+  const router = createBrowserRouter([
+    {
+      path: "/login",
+      element: <LoginPage />,
+    },
+    {
+      path: "/browse",
+      element: <BrowsePage />,
+    },
+  ]);
+
+  return <RouterProvider router={router} />;
 }
 
 export default App;

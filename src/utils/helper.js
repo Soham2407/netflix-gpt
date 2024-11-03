@@ -28,3 +28,13 @@ export const validate = (isSignIn, email, password, fullName) => {
 
   return errors;
 };
+
+export const toastConfig = {
+  position: "top-right",
+  autoClose: 3000,
+  hideProgressBar: true,
+  closeOnClick: true,
+  pauseOnHover: true,
+  progress: undefined,
+  theme: "colored",
+};

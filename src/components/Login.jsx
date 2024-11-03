@@ -1,9 +1,17 @@
 import React, { useRef, useState } from "react";
-import { validate } from "../utils/helper";
+import { useNavigate } from "react-router-dom";
+import { Bounce, toast, ToastContainer } from "react-toastify";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { toastConfig, validate } from "../utils/helper";
+import { auth } from "../utils/firebase";
 
 const Login = () => {
   const [isSignIn, setIsSignIn] = useState(true);
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
 
   const email = useRef(null);
   const password = useRef(null);
@@ -35,26 +43,49 @@ const Login = () => {
       setErrors(errorObj);
     }
 
+    // check if errorObj is empty
     if (Object.keys(errorObj).length === 0) {
-      let data;
       if (isSignIn) {
-        data = {
-          email: email.current.value,
-          password: password.current.value,
-        };
+        // if user sign in
+        signInWithEmailAndPassword(
+          auth,
+          email.current.value,
+          password.current.value
+        )
+          .then((userCredential) => {
+            // Signed in
+            const user = userCredential.user;
+            navigate("/browse");
+          })
+          .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            toast.error(errorMessage, toastConfig);
+          });
       } else {
-        data = {
-          fullName: fullName.current.value,
-          email: email.current.value,
-          password: password.current.value,
-        };
+        // if user sign up
+        createUserWithEmailAndPassword(
+          auth,
+          email.current.value,
+          password.current.value
+        )
+          .then((userCredential) => {
+            // Signed up
+            const user = userCredential.user;
+            navigate("/browse");
+          })
+          .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            toast.error(errorMessage, toastConfig);
+          });
       }
-      console.log("onSubmit", data);
     }
   };
 
   return (
     <div className="max-w-lg bg-black p-4 mx-auto sm:p-12 md:p-16 lg:p-20 sm:rounded-lg sm:bg-[#000000b3]">
+      <ToastContainer transition={Bounce} />
       <h1 className="font-bold text-4xl">{isSignIn ? "Sign In" : "Sign Up"}</h1>
       <div className="w-full mt-8">
         <form className="w-full" onSubmit={handleSubmit}>
