@@ -32,7 +32,7 @@ export const validate = (isSignIn, email, password, fullName) => {
 export const toastConfig = {
   position: "top-right",
   autoClose: 3000,
-  hideProgressBar: true,
+  hideProgressBar: false,
   closeOnClick: true,
   pauseOnHover: true,
   progress: undefined,

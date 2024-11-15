@@ -4,7 +4,8 @@ import { useDispatch } from "react-redux";
 import { onAuthStateChanged } from "firebase/auth";
 import { addUser, removeUser } from "./features/userAuth/userAuthSlice";
 import LoginPage from "./routes/LoginPage";
-import BrowsePage from "./routes/BrowsePage";
+import RootLayout from "./routes/RootLayout";
+import Browse from "./components/Browse";
 import { auth } from "./utils/firebase";
 
 function App() {
@@ -14,7 +15,6 @@ function App() {
     onAuthStateChanged(auth, (user) => {
       if (user) {
         const { uid, email, displayName } = user;
-        console.log(user);
         // if user sign in or sign up then dispatch action
         dispatch(addUser({ uid, email, displayName }));
       } else {
@@ -31,7 +31,13 @@ function App() {
     },
     {
       path: "/browse",
-      element: <BrowsePage />,
+      element: <RootLayout />,
+      children: [
+        {
+          index: true,
+          element: <Browse />,
+        },
+      ],
     },
   ]);
 

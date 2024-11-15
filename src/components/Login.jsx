@@ -1,11 +1,12 @@
 import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bounce, toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  updateProfile,
 } from "firebase/auth";
-import { toastConfig, validate } from "../utils/helper";
+import { validate } from "../utils/helper";
 import { auth } from "../utils/firebase";
 
 const Login = () => {
@@ -55,12 +56,13 @@ const Login = () => {
           .then((userCredential) => {
             // Signed in
             const user = userCredential.user;
+            toast.success("Sign In Successful");
             navigate("/browse");
           })
           .catch((error) => {
             const errorCode = error.code;
             const errorMessage = error.message;
-            toast.error(errorMessage, toastConfig);
+            toast.error(errorMessage);
           });
       } else {
         // if user sign up
@@ -72,12 +74,29 @@ const Login = () => {
           .then((userCredential) => {
             // Signed up
             const user = userCredential.user;
-            navigate("/browse");
+            console.log("auth", auth);
+            updateProfile(auth.currentUser, {
+              displayName: fullName.current.value,
+              photoURL: "",
+            })
+              .then(() => {
+                // Profile updated! && sign up
+                const { uid, email, displayName, photoURL } = auth.currentUser;
+                // if user profile gets updated then dispatch action
+                dispatch(addUser({ uid, email, displayName, photoURL }));
+                toast.success("Sign Up Successful");
+                navigate("/browse");
+              })
+              .catch((error) => {
+                // An error occurred
+                const errorMessage = error.message;
+                toast.error(errorMessage);
+              });
           })
           .catch((error) => {
             const errorCode = error.code;
             const errorMessage = error.message;
-            toast.error(errorMessage, toastConfig);
+            toast.error(errorMessage);
           });
       }
     }
@@ -85,7 +104,6 @@ const Login = () => {
 
   return (
     <div className="max-w-lg bg-black p-4 mx-auto sm:p-12 md:p-16 lg:p-20 sm:rounded-lg sm:bg-[#000000b3]">
-      <ToastContainer transition={Bounce} />
       <h1 className="font-bold text-4xl">{isSignIn ? "Sign In" : "Sign Up"}</h1>
       <div className="w-full mt-8">
         <form className="w-full" onSubmit={handleSubmit}>
